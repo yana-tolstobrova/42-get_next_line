@@ -6,7 +6,7 @@
 /*   By: ytolstob <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/24 19:35:26 by ytolstob          #+#    #+#             */
-/*   Updated: 2024/06/25 19:09:32 by ytolstob         ###   ########.fr       */
+/*   Updated: 2024/11/25 22:35:10 by ytolstob         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,9 +136,8 @@ char	*extract_line_from_remainder(char **remainder)
 	char	*newline_pos;
 	char	*line;
 	char	*new_remainder;
-	int	len;
 
-	if (!*remainder)
+	if (!*remainder || !**remainder)
 		return (NULL);
 	newline_pos = ft_strchr(*remainder, '\n');
 	if (newline_pos)
@@ -149,15 +148,10 @@ char	*extract_line_from_remainder(char **remainder)
 		*remainder = new_remainder;
 		return (line);
 	}
-	len = ft_strlen(*remainder);
-	if (len > 0)
-	{
-		line = ft_strdup(*remainder);
-		free(*remainder);
-		*remainder = NULL;
-		return (line);
-	}
-	return (NULL);
+	line = ft_strdup(*remainder);
+	free(*remainder);
+	*remainder = NULL;
+	return (line);
 }
 
 char	*join_remainder(char *remainder, const char *buffer)
@@ -166,11 +160,7 @@ char	*join_remainder(char *remainder, const char *buffer)
 
 	if (!remainder)
 		return (ft_strdup(buffer));
-	new_remainder = malloc(ft_strlen(remainder) + ft_strlen(buffer) + 1);
-	if (!new_remainder)
-		return (NULL);
-	ft_strcpy(new_remainder, remainder);
-	ft_strcat(new_remainder, buffer);
+	new_remainder = ft_strjoin(remainder, buffer);
 	free(remainder);
 	return (new_remainder);
 }
