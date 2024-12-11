@@ -10,63 +10,117 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <fcntl.h>
-#include <stdio.h>
 #include "get_next_line.h"
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
+
+char	*extract_line(char **remainder, char *newline_pos)
+{
+	char	*line;
+	char	*new_remainder;
+	size_t	line_len;
+
+	line = NULL;
+	line_len = newline_pos - *remainder + 1;
+	line = ft_strndup(*remainder, line_len);
+	if (!line)
+		return (NULL);
+	new_remainder = ft_strdup(newline_pos + 1);
+	if (!new_remainder)
+	{
+		free(line);
+		return (NULL);
+	}
+	free(*remainder);
+	*remainder = new_remainder;
+	return (line);
+}
+
+char	*extract_line_from_remainder(char **remainder)
+{
+	char	*newline_pos;
+	char	*line;
+
+	line = NULL;
+	if (!*remainder || !**remainder)
+		return (NULL);
+	newline_pos = ft_strchr(*remainder, '\n');
+	if (newline_pos)
+	{
+		line = extract_line(remainder, newline_pos);
+	}
+	else
+	{
+		line = ft_strdup(*remainder);
+		free(*remainder);
+		*remainder = NULL;
+	}
+	return (line);
+}
+
+int	read_and_join(int fd, char **remainder, char *buffer)
+{
+	int		bytes_read;
+	char	*new_remainder;
+
+	bytes_read = read(fd, buffer, BUFFER_SIZE);
+	if (bytes_read <= 0)
+		return (bytes_read);
+	buffer[bytes_read] = '\0';
+	new_remainder = ft_strjoin(*remainder, buffer);
+	if (!new_remainder)
+		return (-1);
+	*remainder = new_remainder;
+	return (bytes_read);
+}
 
 char	*get_next_line(int fd)
 {
-	static char	*remainder;
-	char		*line;
-	char		buffer[BUFFER_SIZE + 1];
+	static char	*remainder = NULL;
+	char		*buffer;
 	int			bytes_read;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	if (remainder)
+	buffer = malloc(BUFFER_SIZE + 1);
+	if (!buffer)
+		return (NULL);
+	bytes_read = 0;
+	while (!ft_strchr(remainder, '\n'))
 	{
-		line = extract_line_from_remainder(&remainder);
-		if (line)
-			return (line);
+		bytes_read = read_and_join(fd, &remainder, buffer);
+		if (bytes_read <= 0)
+			break ;
 	}
-	bytes_read = read(fd, buffer, BUFFER_SIZE);
-	while (bytes_read > 0)
+	free(buffer);
+	if (bytes_read < 0 || !remainder)
 	{
-		buffer[bytes_read] = '\0';
-		remainder = join_remainder(remainder, buffer);
-		if (!remainder)
-			return (NULL);
-		line = extract_line_from_remainder(&remainder);
-		if (line)
-			return (line);
-		bytes_read = read(fd, buffer, BUFFER_SIZE);
-	}
-	if (bytes_read == 0 && remainder && *remainder)
-	{
-		line = ft_strdup(remainder);
 		free(remainder);
 		remainder = NULL;
-		return (line);
+		return (NULL);
 	}
-	free(remainder);
-	remainder = NULL;
-	return (NULL);
+	return (extract_line_from_remainder(&remainder));
 }
 
-int	main(void)
-{
-	char	*line;
-	//int		fd;
+// int   main(void)
+// {
+//  	char    *line;
+//     int           fd;
 
-	//fd = open("test.txt", O_RDONLY);
-	line = get_next_line(1);
-	while (line)
-	{
-		printf("%s", line);
-		free(line);
-		line = get_next_line(1);
-	}
-	//if (fd != 0)
-	//	close(1);
-	return (0);
-}
+//     fd = open("test.txt", O_RDONLY);
+//     line = get_next_line(fd);
+// 	// line = get_next_line(1);
+//     while (line)
+//     {
+//     	printf("%s", line);
+//         free(line);
+//         line = get_next_line(fd);
+//         // line = get_next_line(1);
+//     }
+//     if (fd != 0)
+//         close(fd);
+// 	// close(1);
+//     return (0);
+// }

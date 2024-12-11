@@ -21,10 +21,9 @@
 # include <unistd.h>
 
 char	*get_next_line(int fd);
-size_t	ft_strlen(const char *str);
 char	*ft_strchr(const char *s, int c);
 char	*ft_strdup(const char *s1);
-char	*ft_strjoin(const char *s1, const char *s2);
-char	*join_remainder(char *remainder, const char *buffer);
-char	*extract_line_from_remainder(char **remainder);
+char	*ft_strndup(const char *src, size_t n);
+char	*ft_strjoin(char *s1, const char *s2);
+size_t	ft_strlen(const char *str);
 #endif
