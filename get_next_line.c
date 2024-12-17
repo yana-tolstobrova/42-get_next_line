@@ -27,8 +27,11 @@ char	*extract_line(char **remainder, char *newline_pos)
 	line = ft_strndup(*remainder, line_len);
 	if (!line)
 		return (NULL);
-	new_remainder = ft_strdup(newline_pos + 1);
-	if (!new_remainder)
+	if (*(newline_pos + 1) != '\0')
+		new_remainder = ft_strdup(newline_pos + 1);
+	else
+		new_remainder = NULL;
+	if (!new_remainder && *(newline_pos + 1) != '\0')
 	{
 		free(line);
 		return (NULL);
@@ -104,11 +107,11 @@ char	*get_next_line(int fd)
 	return (extract_line_from_remainder(&remainder));
 }
 
-// int   main(void)
+//int   main(void)
 // {
 //  	char    *line;
 //     int           fd;
-
+//
 //     fd = open("test.txt", O_RDONLY);
 //     line = get_next_line(fd);
 // 	// line = get_next_line(1);
@@ -123,4 +126,4 @@ char	*get_next_line(int fd)
 //         close(fd);
 // 	// close(1);
 //     return (0);
-// }
+//}
